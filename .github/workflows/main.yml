@@ -44,5 +44,9 @@ jobs:
         run: echo "::set-env name=NX_RUN_GROUP::$GITHUB_RUN_NUMBER"
 
       # Runs a single command using the runners shell
-      - name: Nx command
+      - name: Nx command build
         run: yarn nx build sample --scan
+      - name: Nx command lint
+        run: yarn nx lint sample --scan
+      - name: Nx command test
+        run: yarn nx test sample --scan
