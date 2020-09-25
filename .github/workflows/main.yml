@@ -9,8 +9,8 @@ on:
     branches: [ master ]
 
 env:
-  NX_BRANCH: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-  NX_RUN_GROUP: $GITHUB_RUN_NUMBER
+  NX_BRANCH: ""
+  NX_RUN_GROUP: ""
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -23,12 +23,26 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2.1.1
+        with:
+          path: |
+            ~/cache
+            !~/cache/exclude
+            **/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
       # Yarn action
       - name: GitHub Action for Yarn
         uses: Borales/actions-yarn@v2.3.0
         with:
           cmd: install
 
+      # Show env. variables
+      - name: See env. variables NX_BRANCH
+        run: echo "::set-env name=NX_BRANCH::$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
+      - name: See env. variables NX_RUN_GROUP
+        run: echo "::set-env name=NX_RUN_GROUP::$GITHUB_RUN_NUMBER"
+
       # Runs a single command using the runners shell
-      - name: Nx test
-        run: nx affected:test --scan
+      - name: Nx command
+        run: yarn nx build sample --scan
